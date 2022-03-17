@@ -2,6 +2,24 @@
  *Powered By:MINDARTLK.
  *version:v0.1.0
  **/
+async function dataToTensor(data) {
+    return tf.tidy();
+}
+
+async function createModel() {
+    const model = tf.sequential();
+    model.add(tf.layers.dense(
+        {
+            inputShape: [1],
+            units: 1
+        }
+    ));
+    model.add(tf.layers.dense({
+        units: 1
+    }));
+
+    return model;
+}
 
 async function getData() {
     const dataResp = await fetch("https://storage.googleapis.com/tfjs-tutorials/carsData.json");
@@ -31,6 +49,9 @@ async function run() {
         yLabel: "Mile per gallon",
         height: 450
     });
+
+    const model = await createModel();
+    tfvis.show.modelSummary({name: 'HP VS MPG model summary'}, model);
 }
 
 document.addEventListener("DOMContentLoaded", run);
