@@ -2,12 +2,36 @@
  *Powered By:MINDARTLK.
  *version:v0.1.0
  **/
+
+async function trainModel(model, inputs, labels) {
+    model.compile(
+        {
+            optimizer: tf.train.adam(),
+            loss: tf.losses.meanSquaredError,
+            metrics: ['mse']
+        }
+    );
+
+    const batchSize = 32;
+    const epochs = 100;
+
+    return await model.fit(inputs, labels, {
+        batchSize,
+        epochs,
+        shuffle: true,
+        callbacks: tfvis.fitCallbacks(
+            {name: "Training Performance Monitor"},
+            ["loss", "mse"], {height: 200, callBacks: ['onEpochEnd']}
+        )
+    })
+}
+
 function dataToTensor(data) {
     return tf.tidy(() => {
         tf.util.shuffle(data);
 
         const inputs = data.map(d => d.hp);
-        const labels = data.map(d => mpg);
+        const labels = data.map(d => d.mpg);
 
         //inputTensor and labalTensor
         const inputTensor = tf.tensor2d(inputs, [inputs.length, 1]);
@@ -84,6 +108,8 @@ async function run() {
     tfvis.show.modelSummary({name: 'HP VS MPG model summary'}, model);
     const tensorData = dataToTensor(data);
     const {inputs, labels} = tensorData;
+    await trainModel(model,inputs,labels);
+    console.log("Done")
 }
 
 document.addEventListener("DOMContentLoaded", run);
